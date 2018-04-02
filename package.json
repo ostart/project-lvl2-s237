@@ -1,0 +1,49 @@
+{
+  "name": "gendiff-ostart-js",
+  "version": "0.0.2",
+  "description": "second hexlet project node.js",
+  "main": "gendiff.js",
+  "bin": {
+    "gendiff": "dist/bin/gendiff.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "babel-node": "babel-node",
+    "build": "set NODE_ENV=production && babel src --out-dir dist --source-maps inline",
+    "eslint": "eslint",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ostart/project-lvl2-s237.git"
+  },
+  "keywords": [
+    "second",
+    "hexlet",
+    "project"
+  ],
+  "author": "Artem Osta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ostart/project-lvl2-s237/issues"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "homepage": "https://github.com/ostart/project-lvl2-s237#readme",
+  "devDependencies": {
+    "babel-cli": "*",
+    "babel-core": "*",
+    "babel-eslint": "^8.2.1",
+    "babel-preset-env": "*",
+    "babel-preset-stage-0": "*",
+    "eslint": "^4.17.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0"
+  },
+  "dependencies": {
+    "commander": "^2.15.1"
+  }
+}
