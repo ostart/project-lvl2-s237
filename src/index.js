@@ -1,34 +1,44 @@
 import _ from 'lodash';
 import fs from 'fs';
+import path from 'path';
+import getParser from './parsers';
+
+const getStringFromArray = (arr) => {
+  const outStr = arr.reduce((acc, value) => acc.concat(value.concat('\n')), '');
+  return '{\n'.concat(outStr, '}');
+};
 
 const genDiff = (pathToFileBefore, pathToFileAfter) => {
-  const fileBefore = fs.readFileSync(pathToFileBefore, 'utf-8');
-  const fileAfter = fs.readFileSync(pathToFileAfter, 'utf-8');
-  const jsonObjBefore = JSON.parse(fileBefore);
-  const jsonObjAfter = JSON.parse(fileAfter);
-  const keysBefore = Object.keys(jsonObjBefore);
-  const keysAfter = Object.keys(jsonObjAfter);
+  const ext = path.extname(pathToFileAfter);
+  const getObjectFromFile = getParser(ext);
+
+  const fileDataBefore = fs.readFileSync(pathToFileBefore, 'utf-8');
+  const fileDataAfter = fs.readFileSync(pathToFileAfter, 'utf-8');
+  const objBefore = getObjectFromFile(fileDataBefore);
+  const objAfter = getObjectFromFile(fileDataAfter);
+
+  const keysBefore = Object.keys(objBefore);
+  const keysAfter = Object.keys(objAfter);
   const strPlus = '  + ';
   const strMinus = '  - ';
   const strTab = '    ';
 
   const united = _.union(keysAfter, keysBefore);
-  const result = united.reduce((acc, value) => {
-    if (_.has(jsonObjAfter, value) && _.has(jsonObjBefore, value)) {
-      if (jsonObjAfter[value] === jsonObjBefore[value]) {
-        return { ...acc, [strTab.concat(value)]: jsonObjAfter[value] };
+  const resultArr = united.reduce((acc, value) => {
+    if (_.has(objAfter, value) && _.has(objBefore, value)) {
+      if (objAfter[value] === objBefore[value]) {
+        return [...acc, `${strTab.concat(value)}: ${objAfter[value]}`];
       }
       const keyPlus = strPlus.concat(value);
       const keyMinus = strMinus.concat(value);
-      return { ...acc, [keyPlus]: jsonObjAfter[value], [keyMinus]: jsonObjBefore[value] };
-    } else if (_.has(jsonObjAfter, value)) {
-      return { ...acc, [strPlus.concat(value)]: jsonObjAfter[value] };
+      return [...acc, `${keyPlus}: ${objAfter[value]}`, `${keyMinus}: ${objBefore[value]}`];
+    } else if (_.has(objAfter, value)) {
+      return [...acc, `${strPlus.concat(value)}: ${objAfter[value]}`];
     }
-    return { ...acc, [strMinus.concat(value)]: jsonObjBefore[value] };
-  }, {});
+    return [...acc, `${strMinus.concat(value)}: ${objBefore[value]}`];
+  }, []);
 
-  const outStr = Object.keys(result).reduce((acc, value) => acc.concat(value.concat(': ', result[value], '\n')), '');
-  return '{\n'.concat(outStr, '}');
+  return getStringFromArray(resultArr);
 };
 
 export default genDiff;
