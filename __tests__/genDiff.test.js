@@ -1,7 +1,7 @@
-import genDiff from '../src/genDiff';
+import fs from 'fs';
+import genDiff from '../src';
 
-const fs = require('fs');
-
+/* eslint no-undef: "off" */
 test('compare two simple json config files', () => {
   const path1 = './__tests__/__fixtures__/before.json';
   const path2 = './__tests__/__fixtures__/after.json';

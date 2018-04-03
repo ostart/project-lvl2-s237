@@ -2,7 +2,7 @@
   "name": "gendiff-ostart-js",
   "version": "0.0.2",
   "description": "second hexlet project node.js",
-  "main": "gendiff.js",
+  "main": "index.js",
   "bin": {
     "gendiff": "dist/bin/gendiff.js"
   },
