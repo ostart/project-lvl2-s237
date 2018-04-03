@@ -22,3 +22,14 @@ test('compare two simple yaml config files', () => {
 
   expect(diff).toEqual(result);
 });
+
+test('compare two simple ini config files', () => {
+  const path1 = './__tests__/__fixtures__/before.ini';
+  const path2 = './__tests__/__fixtures__/after.ini';
+  const resultPath = './__tests__/__fixtures__/compareResult.txt';
+
+  const diff = genDiff(path1, path2);
+  const result = fs.readFileSync(resultPath, 'utf-8');
+
+  expect(diff).toEqual(result);
+});

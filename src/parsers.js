@@ -1,9 +1,11 @@
+import ini from 'ini';
 import { safeLoad } from 'js-yaml';
 
 const parsersList = {
   '.json': JSON.parse,
   '.yaml': safeLoad,
   '.yml': safeLoad,
+  '.ini': ini.parse,
 };
 
 const getParser = format => (data) => {
