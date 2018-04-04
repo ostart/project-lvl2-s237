@@ -33,3 +33,36 @@ test('compare two simple ini config files', () => {
 
   expect(diff).toEqual(result);
 });
+
+test('compare two complicated json config files', () => {
+  const path1 = './__tests__/__fixtures__/beforeComplex.json';
+  const path2 = './__tests__/__fixtures__/afterComplex.json';
+  const resultPath = './__tests__/__fixtures__/compareResultComplex.txt';
+
+  const diff = genDiff(path1, path2);
+  const result = fs.readFileSync(resultPath, 'utf-8');
+
+  expect(diff).toEqual(result);
+});
+
+test('compare two complicated yaml config files', () => {
+  const path1 = './__tests__/__fixtures__/beforeComplex.yml';
+  const path2 = './__tests__/__fixtures__/afterComplex.yml';
+  const resultPath = './__tests__/__fixtures__/compareResultComplex.txt';
+
+  const diff = genDiff(path1, path2);
+  const result = fs.readFileSync(resultPath, 'utf-8');
+
+  expect(diff).toEqual(result);
+});
+
+test('compare two complicated ini config files', () => {
+  const path1 = './__tests__/__fixtures__/beforeComplex.ini';
+  const path2 = './__tests__/__fixtures__/afterComplex.ini';
+  const resultPath = './__tests__/__fixtures__/compareResultComplex.txt';
+
+  const diff = genDiff(path1, path2);
+  const result = fs.readFileSync(resultPath, 'utf-8');
+
+  expect(diff).toEqual(result);
+});

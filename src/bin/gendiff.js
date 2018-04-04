@@ -7,10 +7,10 @@ program
   .description('Compares two configuration files and shows a difference.')
   .option('-f, --format [type]', 'Output format')
   .arguments('<firstConfig> <secondConfig>')
-  .action((first, second) => {
-    const firstConfig = first;
-    const secondConfig = second;
-    const diff = genDiff(firstConfig, secondConfig);
+  .action((firstArg, secondArg) => {
+    const beforeFilePath = firstArg;
+    const afterFilePath = secondArg;
+    const diff = genDiff(beforeFilePath, afterFilePath);
     console.log(diff);
   });
 
