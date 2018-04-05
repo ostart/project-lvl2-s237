@@ -1,6 +1,6 @@
 {
   "name": "gendiff-ostart-js",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "second hexlet project node.js",
   "main": "dist/index.js",
   "bin": {
