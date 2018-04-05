@@ -2,64 +2,42 @@ import _ from 'lodash';
 import fs from 'fs';
 import path from 'path';
 import getParser from './parsers';
-
-const strPlus = '  + ';
-const strMinus = '  - ';
-const strTab = '    ';
-
-const RenderStringFromAST = (arr, tabsCount = 0) => {
-  const outStr = arr.reduce((acc, [key, value]) => {
-    if (value instanceof Array) {
-      const embedded = RenderStringFromAST(value, tabsCount + 1);
-      return acc.concat(strTab.repeat(tabsCount).concat(key.concat(': ', embedded, '\n')));
-    }
-    return acc.concat(strTab.repeat(tabsCount).concat(key.concat(': ', value, '\n')));
-  }, '');
-  return '{\n'.concat(outStr, strTab.repeat(tabsCount).concat('}'));
-};
+import getRenderer from './renderers';
 
 const getArrFromObj = obj => Object.keys(obj).reduce((acc, value) => {
   if (obj[value] instanceof Object) {
-    return [...acc, [strTab.concat(value), getArrFromObj(obj[value])]];
+    return [...acc, ['fix', value, getArrFromObj(obj[value])]];
   }
-  return [...acc, [strTab.concat(value), obj[value]]];
+  return [...acc, ['fix', value, obj[value]]];
 }, []);
 
-const getAST = (objBefore, objAfter) => {
+const getAst = (objBefore, objAfter) => {
   const keysBefore = Object.keys(objBefore);
   const keysAfter = Object.keys(objAfter);
-
   const united = _.union(keysAfter, keysBefore);
+
   const resultAst = united.reduce((acc, value) => {
     if (_.has(objAfter, value) && _.has(objBefore, value)) {
       if (objAfter[value] instanceof Object && objBefore[value] instanceof Object) {
-        return [...acc, [strTab.concat(value), getAST(objBefore[value], objAfter[value])]];
+        return [...acc, ['fix', value, getAst(objBefore[value], objAfter[value])]];
       } else if (objAfter[value] instanceof Object) {
-        const keyPlus = strPlus.concat(value);
-        const keyMinus = strMinus.concat(value);
-        return [...acc, [keyPlus, getArrFromObj(objAfter[value])], [keyMinus, objBefore[value]]];
+        return [...acc, ['upd', value, objBefore[value], getArrFromObj(objAfter[value])]];
       } else if (objBefore[value] instanceof Object) {
-        const keyPlus = strPlus.concat(value);
-        const keyMinus = strMinus.concat(value);
-        return [...acc, [keyPlus, objAfter[value]], [keyMinus, getArrFromObj(objBefore[value])]];
+        return [...acc, ['upd', value, getArrFromObj(objBefore[value]), objAfter[value]]];
       }
       if (objAfter[value] === objBefore[value]) {
-        return [...acc, [strTab.concat(value), objAfter[value]]];
+        return [...acc, ['fix', value, objAfter[value]]];
       }
-      const keyPlus = strPlus.concat(value);
-      const keyMinus = strMinus.concat(value);
-      return [...acc, [keyPlus, objAfter[value]], [keyMinus, objBefore[value]]];
+      return [...acc, ['upd', value, objBefore[value], objAfter[value]]];
     } else if (_.has(objAfter, value)) {
-      return [...acc, [strPlus.concat(value),
-        (objAfter[value] instanceof Object) ? getArrFromObj(objAfter[value]) : objAfter[value]]];
+      return [...acc, ['add', value, (objAfter[value] instanceof Object) ? getArrFromObj(objAfter[value]) : objAfter[value]]];
     }
-    return [...acc, [strMinus.concat(value),
-      (objBefore[value] instanceof Object) ? getArrFromObj(objBefore[value]) : objBefore[value]]];
+    return [...acc, ['del', value, (objBefore[value] instanceof Object) ? getArrFromObj(objBefore[value]) : objBefore[value]]];
   }, []);
   return resultAst;
 };
 
-const genDiff = (pathToFileBefore, pathToFileAfter) => {
+const genDiff = (pathToFileBefore, pathToFileAfter, outputFormat = 'string') => {
   const ext = path.extname(pathToFileAfter);
   const getObjectFromFile = getParser(ext);
 
@@ -68,9 +46,10 @@ const genDiff = (pathToFileBefore, pathToFileAfter) => {
   const objBefore = getObjectFromFile(fileDataBefore);
   const objAfter = getObjectFromFile(fileDataAfter);
 
-  const ast = getAST(objBefore, objAfter);
+  const ast = getAst(objBefore, objAfter);
 
-  return RenderStringFromAST(ast);
+  const getOutputFromAst = getRenderer(outputFormat);
+  return getOutputFromAst(ast);
 };
 
 export default genDiff;
