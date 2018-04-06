@@ -25,20 +25,25 @@ const renderStringFromAst = (arr, tabsCount = 0) => {
           strIndent.fixed.repeat(tabsCount).concat(strIndent.added, key, ': ', valTo),
           strIndent.fixed.repeat(tabsCount).concat(strIndent.deleted, key, ': ', valFrom)];
       }
-      case 'fixed': {
-        const { key, valAfter, children } = node;
-        if (children) {
-          const embedded = renderStringFromAst(children, tabsCount + 1);
-          return [...acc, strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', embedded)];
-        }
-        const valTo = getStringFromObj(valAfter, tabsCount + 1);
-        return [...acc, strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', valTo)];
+      case 'nested': {
+        const { key, children } = node;
+        const embedded = renderStringFromAst(children, tabsCount + 1);
+        return [...acc, strIndent.fixed.repeat(tabsCount).concat(strIndent.fixed, key, ': ', embedded)];
       }
-      case 'added':
-      case 'deleted': {
+      case 'fixed': {
+        const { key, value } = node;
+        const val = getStringFromObj(value, tabsCount + 1);
+        return [...acc, strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', val)];
+      }
+      case 'added': {
         const { key, valAfter } = node;
         const valTo = getStringFromObj(valAfter, tabsCount + 1);
         return [...acc, strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', valTo)];
+      }
+      case 'deleted': {
+        const { key, valBefore } = node;
+        const valFrom = getStringFromObj(valBefore, tabsCount + 1);
+        return [...acc, strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', valFrom)];
       }
       default:
         return acc;

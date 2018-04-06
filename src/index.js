@@ -4,10 +4,6 @@ import path from 'path';
 import getParser from './parsers';
 import getRenderer from './renderers';
 
-const createNode = (type, key, valBefore, valAfter) => ({
-  type, key, valBefore, valAfter,
-});
-
 const getAst = (objBefore, objAfter) => {
   const keysBefore = Object.keys(objBefore);
   const keysAfter = Object.keys(objAfter);
@@ -16,16 +12,18 @@ const getAst = (objBefore, objAfter) => {
   const resultAst = united.reduce((acc, key) => {
     if (_.has(objAfter, key) && _.has(objBefore, key)) {
       if (objAfter[key] instanceof Object && objBefore[key] instanceof Object) {
-        return [...acc, { type: 'fixed', key, children: getAst(objBefore[key], objAfter[key]) }];
+        return [...acc, { type: 'nested', key, children: getAst(objBefore[key], objAfter[key]) }];
       }
       if (objAfter[key] === objBefore[key]) {
-        return [...acc, createNode('fixed', key, objBefore[key], objAfter[key])];
+        return [...acc, { type: 'fixed', key, value: objAfter[key] }];
       }
-      return [...acc, createNode('updated', key, objBefore[key], objAfter[key])];
+      return [...acc, {
+        type: 'updated', key, valBefore: objBefore[key], valAfter: objAfter[key],
+      }];
     } else if (_.has(objAfter, key)) {
-      return [...acc, createNode('added', key, objAfter[key], objAfter[key])];
+      return [...acc, { type: 'added', key, valAfter: objAfter[key] }];
     }
-    return [...acc, createNode('deleted', key, objBefore[key], objBefore[key])];
+    return [...acc, { type: 'deleted', key, valBefore: objBefore[key] }];
   }, []);
   return resultAst;
 };

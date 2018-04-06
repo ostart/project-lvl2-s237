@@ -18,10 +18,10 @@ const renderPlainFromAst = (arr, keyPathArr = []) => {
         const after = stringify(valAfter);
         return [...acc, `Property '${keyPath}' was updated. From ${before} to ${after}`];
       }
+      case 'nested':
+        return [...acc, renderPlainFromAst(children, keyPathArr.concat(key))];
       case 'fixed':
-        return (children) ?
-          [...acc, renderPlainFromAst(children, keyPathArr.concat(key))] :
-          acc;
+        return acc;
       default:
         return acc;
     }
