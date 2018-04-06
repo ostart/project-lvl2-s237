@@ -132,3 +132,10 @@ test('compare two complicated ini config files', () => {
 
 //   expect(diff).toEqual(result);
 // });
+
+
+// const path1 = './__tests__/__fixtures__/beforeComplex.json';
+// const path2 = './__tests__/__fixtures__/afterComplex.json';
+
+// const diff = genDiff(path1, path2);
+// console.log(diff);
