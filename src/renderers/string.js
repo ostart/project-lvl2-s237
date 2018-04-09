@@ -1,3 +1,5 @@
+import { flatten } from 'lodash';
+
 const strIndent = {
   fixed: '    ',
   added: '  + ',
@@ -15,40 +17,40 @@ const getStringFromObj = (obj, tabsCount = 0) =>
   (obj instanceof Object ? stringify(obj, tabsCount) : obj);
 
 const renderStringFromAst = (arr, tabsCount = 0) => {
-  const outStr = arr.reduce((acc, node) => {
+  const outArr = arr.map((node) => {
     switch (node.type) {
       case 'updated': {
         const { key, valBefore, valAfter } = node;
         const valFrom = getStringFromObj(valBefore, tabsCount + 1);
         const valTo = getStringFromObj(valAfter, tabsCount + 1);
-        return [...acc,
-          strIndent.fixed.repeat(tabsCount).concat(strIndent.added, key, ': ', valTo),
+        return [strIndent.fixed.repeat(tabsCount).concat(strIndent.added, key, ': ', valTo),
           strIndent.fixed.repeat(tabsCount).concat(strIndent.deleted, key, ': ', valFrom)];
       }
       case 'nested': {
         const { key, children } = node;
         const embedded = renderStringFromAst(children, tabsCount + 1);
-        return [...acc, strIndent.fixed.repeat(tabsCount).concat(strIndent.fixed, key, ': ', embedded)];
+        return strIndent.fixed.repeat(tabsCount).concat(strIndent.fixed, key, ': ', embedded);
       }
       case 'fixed': {
         const { key, value } = node;
         const val = getStringFromObj(value, tabsCount + 1);
-        return [...acc, strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', val)];
+        return strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', val);
       }
       case 'added': {
         const { key, valAfter } = node;
         const valTo = getStringFromObj(valAfter, tabsCount + 1);
-        return [...acc, strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', valTo)];
+        return strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', valTo);
       }
       case 'deleted': {
         const { key, valBefore } = node;
         const valFrom = getStringFromObj(valBefore, tabsCount + 1);
-        return [...acc, strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', valFrom)];
+        return strIndent.fixed.repeat(tabsCount).concat(strIndent[node.type], key, ': ', valFrom);
       }
       default:
-        return acc;
+        return node;
     }
-  }, []).join('\n').concat('\n');
+  });
+  const outStr = flatten(outArr).join('\n').concat('\n');
   return '{\n'.concat(outStr, strIndent.fixed.repeat(tabsCount), '}');
 };
 
